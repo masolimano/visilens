@@ -22,9 +22,9 @@ actually depend on this; only the lens mass changes.
 """
 
 import numpy as np
+import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as pl; pl.ioff()
 import sys
-sys.path.append('/Users/jspilker/Research/visilens')
 import visilens as vl
 import time
 
@@ -34,8 +34,7 @@ plotfbase = 'SPT0346-52_modelcont'
 # This is a file I generated using a script similar to the first
 # example. You should also have been able to download it from
 # the same place as you got this script.
-data = vl.read_visdata('SPT0346-52_cont.bin')
-
+data = vl.read_visdata('SPT0346-52_cont.bin') 
 # If you want/need to manipulate the data further, you can do that too:
 # data.sigma *= 1.5 # try increasing the noise to map out any local minima
 
@@ -127,7 +126,7 @@ modelcal = True
 
 # Now we do some setup for the MCMC run. These are the usual emcee
 # parameters which govern how many chains are run and for how long.
-nwalkers,nburn,nstep = 300,300,300
+nwalkers,nburn,nstep = 40,100,150
 
 # For multiprocessing, there's a couple options. For a single machine,
 # you can just specify the number of cores to use, like below. It can
@@ -135,7 +134,7 @@ nwalkers,nburn,nstep = 300,300,300
 # and run your script using
 # mpirun -np 64 --mca mpi_warn_on_fork 0 python Ex3_fit_continuum_SPT0346-52.py
 # [that mpi_warn just turns off some harmless scare text I find annoying]
-nthreads = 7
+nthreads = 12
 mpirun = False
 
 
@@ -145,7 +144,7 @@ mcmcresult = vl.LensModelMCMC(data=data,lens=lens,source=source,xmax=xmax,highre
       modelcal=modelcal,nwalkers=nwalkers,nburn=nburn,nstep=nstep,nthreads=nthreads,mpirun=mpirun)
 
 t2 = time.time()
-print "total time: {0:.1f} hours for {1:.0f} samples".format((t2-t1)/3600.,nwalkers*(nburn+nstep))
+print("total time: {0:.1f} hours for {1:.0f} samples".format((t2-t1)/3600.,nwalkers*(nburn+nstep)))
 
 # How to save the data is up to you; I find a gzipped python pickle file
 # convenient. Can be loaded later with 

@@ -5,10 +5,10 @@ import sys
 import emcee
 import copy
 from astropy.cosmology import Planck15
-from class_utils import *
-from lensing import *
-from utils import *
-from calc_likelihood import calc_vis_lnlike
+from .class_utils import *
+from .lensing import *
+from .utils import *
+from .calc_likelihood import calc_vis_lnlike
 
 arcsec2rad = np.pi/180/3600
 
@@ -16,7 +16,8 @@ def LensModelMCMC(data,lens,source,
                   xmax=30.,highresbox=[-3.,3.,-3.,3.],emitres=None,fieldres=None,
                   sourcedatamap=None, scaleamp=False, shiftphase=False,
                   modelcal=True,cosmo=Planck15,
-                  nwalkers=1e3,nburn=1e3,nstep=1e3,pool=None,nthreads=1,mpirun=False):
+                  nwalkers=1e3,nburn=1e3,nstep=1e3,pool=None,nthreads=1,mpirun=False,
+		  backend=None):
       """
       Wrapper function which basically takes what the user wants and turns it into the
       format needed for the acutal MCMC lens modeling.
@@ -216,27 +217,27 @@ def LensModelMCMC(data,lens,source,
             args = [data,lens,source,Dd,Ds,Dds,ug,
                     xmap,ymap,xemit,yemit,indices,
                     sourcedatamap,scaleamp,shiftphase,modelcal],
-            threads=nthreads,pool=pool)
+            threads=nthreads,pool=pool, backend=backend)
 
       
       # Run burn-in phase
-      print "Running burn-in... "
+      print("Running burn-in... ")
       #pos,prob,rstate,mus = lenssampler.run_mcmc(initials,nburn,storechain=False)
-      for i,result in enumerate(lenssampler.sample(initials,iterations=nburn,storechain=False)):
-            if i%20==0: print 'Burn-in step ',i,'/',nburn
+      for i,result in enumerate(lenssampler.sample(initials,iterations=nburn,store=False)):
+            if i%20==0: print('Burn-in step ',i,'/',nburn)
             pos,prob,rstate,blob = result
       
       
       lenssampler.reset()
       
       # Run actual chains
-      print "Done. Running chains... "
-      for i,result in enumerate(lenssampler.sample(pos,rstate0=rstate,iterations=nstep,storechain=True)):
-            if i%20==0: print 'Chain step ',i,'/',nstep
+      print("Done. Running chains... ")
+      for i,result in enumerate(lenssampler.sample(pos,rstate0=rstate,iterations=nstep,store=True)):
+            if i%20==0: print('Chain step ',i,'/',nstep)
       
       #lenssampler.run_mcmc(pos,nstep,rstate0=rstate)
       if mpirun: pool.close()
-      print "Mean acceptance fraction: ",np.mean(lenssampler.acceptance_fraction)
+      print("Mean acceptance fraction: ",np.mean(lenssampler.acceptance_fraction))
 
       #return lenssampler.flatchain,lenssampler.blobs,colnames
       

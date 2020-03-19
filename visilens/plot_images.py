@@ -6,10 +6,10 @@ from scipy.ndimage.measurements import center_of_mass
 import matplotlib.pyplot as pl; pl.ioff()
 import matplotlib.cm as cm
 from matplotlib.colors import SymLogNorm
-from class_utils import *
-from calc_likelihood import *
-from utils import *
-from lensing import *
+from .class_utils import *
+from .calc_likelihood import *
+from .utils import *
+from .lensing import *
 
 arcsec2rad = np.pi/180./3600.
 c = 2.99792458e8 # in m/s
@@ -205,7 +205,7 @@ def plot_images(data,mcmcresult,returnimages=False,plotcombined=False,plotall=Fa
                   except TypeError:
                         s = float(level)
             
-            print "Data - Model rms: {0:0.3e}".format(imdiff.std())
+            print("Data - Model rms: {0:0.3e}".format(imdiff.std()))
             axarr[row,0].imshow(imdata,interpolation='nearest',extent=ext,cmap=cmap)
             axarr[row,0].contour(imdata,extent=ext,colors='k',origin='image',levels=s*mapcontours)
             axarr[row,0].set_xlim(limits[0],limits[1]); axarr[row,0].set_ylim(limits[2],limits[3])

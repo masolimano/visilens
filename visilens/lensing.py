@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as pl; pl.ioff()
 import scipy.sparse
 import copy
-from class_utils import *
-from utils import *
+from .class_utils import *
+from .utils import *
 from astropy.cosmology import Planck15
 import astropy.constants as co
 
@@ -101,7 +101,7 @@ def GenerateLensingGrid(data=None,xmax=None,emissionbox=[-5,5,-5,5],fieldres=Non
       else: emitres *= arcsec2rad
 
       # Calculate the field grid size as a power of 2.
-      Nfield = 2**np.ceil(np.log2(2*np.abs(xmax)*arcsec2rad/fieldres))
+      Nfield = int(2**np.ceil(np.log2(2*np.abs(xmax)*arcsec2rad/fieldres)))
 
       # Calculate the grid coordinates for the larger field.
       fieldcoords = np.linspace(-np.abs(xmax),np.abs(xmax),Nfield)
@@ -112,8 +112,8 @@ def GenerateLensingGrid(data=None,xmax=None,emissionbox=[-5,5,-5,5],fieldres=Non
       indices = [int(ind) for ind in indices] # cast to int's for newer numpy versions
 
       # Calculate the grid coordinates for the high-res lensing grid; grids meet at indices. Some pixel-shifting reqd.
-      Nemx = 1 + np.abs(indices[1]-indices[0])*np.ceil((fieldcoords[1]-fieldcoords[0])/(2*emitres*rad2arcsec))
-      Nemy = 1 + np.abs(indices[3]-indices[2])*np.ceil((fieldcoords[1]-fieldcoords[0])/(2*emitres*rad2arcsec))
+      Nemx = int(1 + np.abs(indices[1]-indices[0])*np.ceil((fieldcoords[1]-fieldcoords[0])/(2*emitres*rad2arcsec)))
+      Nemy = int(1 + np.abs(indices[3]-indices[2])*np.ceil((fieldcoords[1]-fieldcoords[0])/(2*emitres*rad2arcsec)))
       xemcoords = np.linspace(fieldcoords[indices[0]],fieldcoords[indices[1]],Nemx)
       yemcoords = np.linspace(fieldcoords[indices[2]],fieldcoords[indices[3]],Nemy)
       xmapemission,ymapemission = np.meshgrid(xemcoords,yemcoords)
