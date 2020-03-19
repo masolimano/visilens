@@ -16,7 +16,7 @@ def LensModelMCMC(data,lens,source,
                   xmax=30.,highresbox=[-3.,3.,-3.,3.],emitres=None,fieldres=None,
                   sourcedatamap=None, scaleamp=False, shiftphase=False,
                   modelcal=True,cosmo=Planck15,
-                  nwalkers=1e3,nburn=1e3,nstep=1e3,pool=None,nthreads=1,mpirun=False,
+                  nwalkers=1e3,nburn=1e3,nstep=1e3,nthreads=1,mpirun=False,
 		  backend=None):
       """
       Wrapper function which basically takes what the user wants and turns it into the
@@ -71,7 +71,7 @@ def LensModelMCMC(data,lens,source,
       mpirun:
             Whether to parallelize using MPI instead of multiprocessing. If True,
             nthreads has no effect, and your script should be run with, eg,
-            mpirun -np 16 python lensmodel.py.
+            mpiexec -np 16 python lensmodel.py.
 
       Returns:
       mcmcresult:
@@ -89,16 +89,17 @@ def LensModelMCMC(data,lens,source,
             to return this once mcmcresult is packaged up nicely.
       """
 
-      if pool: nthreads = 1
-      elif mpirun:
-            nthreads = 1
-            from emcee.utils import MPIPool
-            pool = MPIPool(debug=False,loadbalance=True)
-            if not pool.is_master():
-            	pool.wait()
-            	sys.exit(0)
-      else: pool = None
 
+      if mpirun:
+           from schwimmbad import MPIPool
+           pool = MPIPool()
+           if not pool.is_master():
+                  pool.wait()
+                  sys.exit(0)
+      else:
+           from multiprocessing import Pool
+           pool = Pool(processes=nthreads)
+      
       # Making these lists just makes later stuff easier since we now know the dtype
       lens = list(np.array([lens]).flatten())
       source = list(np.array([source]).flatten()) # Ensure source(s) are a list
@@ -235,8 +236,9 @@ def LensModelMCMC(data,lens,source,
       for i,result in enumerate(lenssampler.sample(pos,rstate0=rstate,iterations=nstep,store=True)):
             if i%20==0: print('Chain step ',i,'/',nstep)
       
-      #lenssampler.run_mcmc(pos,nstep,rstate0=rstate)
-      if mpirun: pool.close()
+      # Close pool
+      pool.close()
+      
       print("Mean acceptance fraction: ",np.mean(lenssampler.acceptance_fraction))
 
       #return lenssampler.flatchain,lenssampler.blobs,colnames
