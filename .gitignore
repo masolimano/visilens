@@ -115,4 +115,7 @@ dmypy.json
 .pyre/
 
 # End of https://www.gitignore.io/api/python
+reverse_engineering.md
 
+*.pzip
+*.png
